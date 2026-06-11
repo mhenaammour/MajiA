@@ -1,0 +1,141 @@
+# =============================================================================
+#  parameters.yaml — TOUT le "savoir métier" de l'outil, éditable sans code.
+#  Modifier ce fichier (ou l'uploader dans l'app) suffit à faire évoluer
+#  l'outil : ajouter une matière, changer un taux, ajouter une opération…
+#  Rien n'est figé dans le programme.
+# =============================================================================
+
+defaults:
+  material: "S235 (acier)"
+  quantity: 100
+  margin_rate: 0.20
+  scrap_rate: 0.20
+
+# Taux horaires (€/h) — noms logiques réutilisés par les opérations
+rates_eur_h:
+  laser: 120
+  plieuse: 75
+  mo: 45            # main d'œuvre
+  usinage: 90
+  soudure: 65
+
+# Temps opératoires (secondes)
+times_s:
+  bend: 20
+  insert: 10
+  tap: 12
+  countersink: 8
+  pierce: 0.6
+  finishing_base: 30
+  finishing_per_hole: 4
+  inspection: 20
+  packaging: 8
+
+# Réglages de série (minutes), amortis sur la quantité
+setup:
+  programming_min: 15
+  laser_min: 10
+  bend_min_per_bend: 7
+
+components:
+  insert_unit_price_eur: 0.15
+
+machining:
+  mrr_cm3_min: {acier: 8, inox: 4, alu: 25, laiton: 18, cuivre: 12, titane: 2}
+
+weld_speed_mm_min: 300
+
+# Base matière (prix €/kg, densité g/cm³, famille)
+materials:
+  "DC01 (acier doux)":   {price_eur_kg: 1.15, density: 7.85, family: acier}
+  "DC04 (emboutissage)": {price_eur_kg: 1.25, density: 7.85, family: acier}
+  "S235 (acier)":        {price_eur_kg: 1.20, density: 7.85, family: acier}
+  "S355 (acier HLE)":    {price_eur_kg: 1.35, density: 7.85, family: acier}
+  "Inox 304":            {price_eur_kg: 4.50, density: 7.90, family: inox}
+  "Inox 316L":           {price_eur_kg: 6.20, density: 8.00, family: inox}
+  "Inox 430":            {price_eur_kg: 3.90, density: 7.70, family: inox}
+  "Aluminium 5754":      {price_eur_kg: 3.80, density: 2.66, family: alu}
+  "Aluminium 6061":      {price_eur_kg: 4.20, density: 2.70, family: alu}
+  "Laiton CuZn37":       {price_eur_kg: 7.50, density: 8.40, family: laiton}
+  "Cuivre Cu-ETP":       {price_eur_kg: 9.50, density: 8.96, family: cuivre}
+  "Titane Grade 2":      {price_eur_kg: 35.0, density: 4.51, family: titane}
+
+# Valeurs par défaut par famille (repli pour une matière inconnue)
+family_defaults:
+  acier:  {price_eur_kg: 1.30, density: 7.85}
+  inox:   {price_eur_kg: 5.00, density: 7.90}
+  alu:    {price_eur_kg: 4.00, density: 2.70}
+  laiton: {price_eur_kg: 7.50, density: 8.40}
+  cuivre: {price_eur_kg: 9.50, density: 8.96}
+  titane: {price_eur_kg: 35.0, density: 4.51}
+
+# Mots-clés -> famille (déduction d'une matière libre)
+material_keywords:
+  inox: inox
+  "316": inox
+  "304": inox
+  "430": inox
+  stainless: inox
+  alu: alu
+  aluminium: alu
+  "6061": alu
+  "5754": alu
+  "5086": alu
+  laiton: laiton
+  brass: laiton
+  cuivre: cuivre
+  copper: cuivre
+  titane: titane
+  titanium: titane
+  acier: acier
+  steel: acier
+  s235: acier
+  s355: acier
+  dc01: acier
+  dc04: acier
+
+# Vitesses de coupe laser (mm/min) par famille et épaisseur (mm)
+cutting_speed_mm_min:
+  acier: {1: 8000, 2: 5000, 3: 3200, 5: 1900, 8: 1000}
+  inox:  {1: 6000, 2: 3500, 3: 2200, 5: 1200, 8: 600}
+  alu:   {1: 9000, 2: 6500, 3: 4500, 5: 2600, 8: 1400}
+
+# Traitements de surface (€/m² de surface traitée)
+treatments_eur_m2:
+  "Aucun": 0
+  "Ébavurage seul": 0
+  "Zingage": 12
+  "Peinture poudre (époxy)": 18
+  "Anodisation": 25
+  "Passivation inox": 8
+  "Brossage / grainage": 10
+
+# Bornes de cohérence pour la fiabilité
+sanity:
+  thickness_mm: [0.3, 20.0]
+  dim_mm: [1.0, 3000.0]
+  hole_diam_mm: [0.5, 200.0]
+  price_per_kg: [3.0, 400.0]
+
+# -----------------------------------------------------------------------------
+#  CATALOGUE D'OPÉRATIONS — c'est ici que vit la logique de devis.
+#  Chaque opération est une donnée (pas du code). Pour en ajouter une,
+#  on ajoute une entrée ci-dessous. "kind" = type de calcul ; les autres
+#  champs pointent vers des taux/temps/quantités par leur nom logique.
+#  Quantités disponibles : n_bends, n_threaded, n_countersunk, n_inserts,
+#  n_holes, weld_mm, machined_volume_cm3.
+# -----------------------------------------------------------------------------
+operations:
+  - {id: matiere,    label: "Matière",                     group: matière,    kind: material}
+  - {id: decoupe,    label: "Découpe laser",               group: découpe,    kind: cut,        rate: laser,   process: [tôlerie, mixte, profilé]}
+  - {id: pliage,     label: "Pliage",                      group: pliage,     kind: time_per_unit, qty: n_bends,        time: bend,        rate: plieuse}
+  - {id: taraudage,  label: "Taraudage",                   group: taraudage,  kind: time_per_unit, qty: n_threaded,     time: tap,         rate: mo}
+  - {id: fraisurage, label: "Fraisurage / lamage",         group: fraisurage, kind: time_per_unit, qty: n_countersunk,  time: countersink, rate: usinage}
+  - {id: usinage,    label: "Usinage",                     group: usinage,    kind: volume_rate,   qty: machined_volume_cm3, rate: usinage, process: [usinage, mixte]}
+  - {id: soudure,    label: "Soudure",                     group: soudure,    kind: length_rate,   qty: weld_mm,        rate: soudure}
+  - {id: sertissage, label: "Sertissage inserts",          group: sertissage, kind: time_per_unit, qty: n_inserts,      time: insert,      rate: mo}
+  - {id: traitement, label: "Traitement de surface",       group: traitement, kind: area_rate,     rate: mo}
+  - {id: finition,   label: "Finition / ébavurage",        group: finition,   kind: time_base_per_hole, base: finishing_base, per_hole: finishing_per_hole, rate: mo}
+  - {id: controle,   label: "Contrôle + conditionnement",  group: contrôle,   kind: fixed_time,    times: [inspection, packaging], rate: mo}
+  - {id: composants, label: "Composants",                  group: composants, kind: components}
+  - {id: reglages,   label: "Réglages série (amortis)",    group: réglages,   kind: setup}
