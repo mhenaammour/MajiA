@@ -113,25 +113,10 @@ Plan (PDF/img) ──► extraction.py (Claude Vision)  ──► PartFeatures (
 
 ---
 
-## 7. Personnalisation aux couleurs Maji
 
-Toute l'identité visuelle est centralisée dans **`brand.py`** (dictionnaire `BRAND`).
-Les couleurs actuelles approchent l'univers Maji ; pour la charte exacte :
 
-1. **Couleurs** : remplacez les codes hex dans `BRAND` (`ink`, `primary`, `primary_dark`…).
-   Mettez aussi à jour `.streamlit/config.toml` (`primaryColor`, `textColor`).
-   Astuce : ouvrez le site Maji, clic droit → *Inspecter*, relevez les codes hex,
-   ou récupérez-les depuis la charte graphique.
-2. **Logo** : déposez le fichier `logo.png` dans ce dossier → il remplace
-   automatiquement le wordmark « MAJI » dans l'en-tête (et le PDF reprend la couleur `ink`).
 
-Aucune couleur n'est codée en dur ailleurs : un seul fichier à modifier.
-
-> `preview.html` donne un aperçu statique du rendu (à ouvrir dans un navigateur).
-
----
-
-## 8. Déploiement GitHub + Streamlit Cloud (sans exposer la clé)
+## 7. Déploiement GitHub + Streamlit Cloud (sans exposer la clé)
 
 **Règle d'or : la clé API n'entre jamais dans Git.** L'app lit la clé depuis
 `st.secrets`, une variable d'environnement, ou la saisie manuelle — jamais en dur.
@@ -170,7 +155,7 @@ git push -u origin main
 
 ---
 
-## 9. Paramétrage dynamique (rien n'est figé)
+## 8. Paramétrage dynamique (rien n'est figé)
 
 Tout le « savoir métier » est dans **`parameters.yaml`** : matières, taux horaires,
 vitesses de coupe, traitements, temps opératoires **et la liste des opérations**.
